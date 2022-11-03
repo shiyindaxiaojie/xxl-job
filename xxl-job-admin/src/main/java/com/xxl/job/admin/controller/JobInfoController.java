@@ -10,6 +10,8 @@ import com.xxl.job.admin.service.XxlJobService;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.enums.ExecutorBlockStrategyEnum;
 import com.xxl.job.core.glue.GlueTypeEnum;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,6 +29,8 @@ import java.util.Map;
 @Controller
 @RequestMapping("/jobinfo")
 public class JobInfoController {
+
+	private static final Logger log = LoggerFactory.getLogger(JobInfoController.class);
 
 	@Resource
 	private XxlJobGroupDao xxlJobGroupDao;
@@ -100,5 +104,29 @@ public class JobInfoController {
 		JobTriggerPoolHelper.trigger(id, TriggerTypeEnum.MANUAL, -1, null, executorParam);
 		return ReturnT.SUCCESS;
 	}
-	
+
+	@RequestMapping("/addOrUpdate")
+	@ResponseBody
+	public ReturnT<String> addOrUpdate(XxlJobInfo jobInfo) {
+		ReturnT<XxlJobInfo> returnT = xxlJobService.existsByGroupAndHandler(jobInfo.getJobGroup(),
+				jobInfo.getExecutorHandler());
+
+		int jobId = 0;
+		XxlJobInfo xxlJobInfoFromDB = returnT.getContent();
+		if (xxlJobInfoFromDB != null) {
+			jobId = xxlJobInfoFromDB.getId();
+			log.info("Found executorHandler '{}' from groupId '{}', return jobId '{}'",
+					jobInfo.getExecutorHandler(), jobInfo.getJobGroup(), jobId);
+		} else {
+			ReturnT<String> jobInfoReturnT = xxlJobService.add(jobInfo);
+			if (jobInfoReturnT.getCode() == ReturnT.SUCCESS_CODE) {
+				log.info("Save executorHandler '{}' for groupId '{}', return jobId '{}'",
+						jobInfo.getExecutorHandler(), jobInfo.getJobGroup(), jobInfo.getId());
+			} else {
+				log.info("Save executorHandler '{}' for groupId '{}', failed",
+						jobInfo.getExecutorHandler(), jobInfo.getJobGroup());
+			}
+		}
+		return jobId != 0? new ReturnT<>(String.valueOf(jobId)) : ReturnT.FAIL;
+	}
 }

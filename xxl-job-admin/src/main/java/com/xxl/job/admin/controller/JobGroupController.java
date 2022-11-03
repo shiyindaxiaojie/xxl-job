@@ -10,6 +10,8 @@ import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.enums.RegistryConfig;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,6 +30,8 @@ import java.util.List;
 @Controller
 @RequestMapping("/jobgroup")
 public class JobGroupController {
+
+	private static final Logger log = LoggerFactory.getLogger(JobGroupController.class);
 
 	@Resource
 	public XxlJobInfoDao xxlJobInfoDao;
@@ -69,9 +73,8 @@ public class JobGroupController {
 				}
 			}
 		}
-
 		int ret = xxlJobGroupDao.save(xxlJobGroup);
-		return (ret>0)?ReturnT.SUCCESS:ReturnT.FAIL;
+		return (ret>0)? ReturnT.SUCCESS:ReturnT.FAIL;
 	}
 
 	@RequestMapping("/update")
@@ -154,4 +157,44 @@ public class JobGroupController {
 		return (ret>0)?ReturnT.SUCCESS:ReturnT.FAIL;
 	}
 
+	@RequestMapping("/saveOrUpdate")
+	@ResponseBody
+	public ReturnT<String> saveOrUpdate(XxlJobGroup xxlJobGroup){
+
+		// valid
+		if (xxlJobGroup.getAppName()==null || StringUtils.isBlank(xxlJobGroup.getAppName())) {
+			return new ReturnT<>(500, (I18nUtil.getString("system_please_input")+"AppName") );
+		}
+		if (xxlJobGroup.getAppName().length()<4 || xxlJobGroup.getAppName().length()>64) {
+			return new ReturnT<>(500, I18nUtil.getString("jobgroup_field_appName_length") );
+		}
+		if (xxlJobGroup.getTitle()==null || StringUtils.isBlank(xxlJobGroup.getTitle())) {
+			return new ReturnT<>(500, (I18nUtil.getString("system_please_input") + I18nUtil.getString("jobgroup_field_title")) );
+		}
+		if (xxlJobGroup.getAddressType()!=0) {
+			if (StringUtils.isBlank(xxlJobGroup.getAddressList())) {
+				return new ReturnT<>(500, I18nUtil.getString("jobgroup_field_addressType_limit") );
+			}
+			String[] addresss = xxlJobGroup.getAddressList().split(",");
+			for (String item: addresss) {
+				if (StringUtils.isBlank(item)) {
+					return new ReturnT<>(500, I18nUtil.getString("jobgroup_field_registryList_unvalid"));
+				}
+			}
+		}
+
+		int groupId;
+		XxlJobGroup dataObject = xxlJobGroupDao.findByAppName(xxlJobGroup.getAppName());
+		if (dataObject != null) {
+			groupId = dataObject.getId();
+			log.info("Found appName '{}' from executor group, return groupId '{}'",
+					xxlJobGroup.getAppName(), groupId);
+		} else {
+			xxlJobGroupDao.save(xxlJobGroup);
+			groupId = xxlJobGroup.getId();
+			log.info("Save appName '{}' for executor group, return groupId '{}'",
+					xxlJobGroup.getAppName(), groupId);
+		}
+		return (groupId>0)? new ReturnT<>(String.valueOf(groupId)):ReturnT.FAIL; // 返回自增ID，modify by gyl
+	}
 }

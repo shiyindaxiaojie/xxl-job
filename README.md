@@ -28,6 +28,13 @@
     </p>    
 </p>
 
+### Fork
+
+Supports auto registry executor and jobhandler from `@XxlJobRegister`. For more features, please refer to [CHANGELOG.
+md](https://github.com/shiyindaxiaojie/xxl-job/blob/master/CHANGELOG.md)
+
+支持应用通过 `@XxlJobRegister` 注解完成执行器（Executor）和任务（Job）的自动注册。变更记录请查看 [CHANGELOG.md](https://github.com/shiyindaxiaojie/xxl-job/blob/master/CHANGELOG.md)
+
 
 ## Introduction
 XXL-JOB is a lightweight distributed task scheduling framework. 

@@ -35,4 +35,6 @@ public interface XxlJobInfoDao {
 
 	public int findAllCount();
 
+	public XxlJobInfo findByGroupAndHandler(@Param("jobGroup") int jobGroup,
+											@Param("executorHandler") String executorHandler);
 }

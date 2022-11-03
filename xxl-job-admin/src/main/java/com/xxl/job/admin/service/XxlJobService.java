@@ -3,6 +3,7 @@ package com.xxl.job.admin.service;
 
 import com.xxl.job.admin.core.model.XxlJobInfo;
 import com.xxl.job.core.biz.model.ReturnT;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.Date;
 import java.util.Map;
@@ -83,4 +84,12 @@ public interface XxlJobService {
 	 */
 	public ReturnT<Map<String,Object>> chartInfo(Date startDate, Date endDate);
 
+	/**
+	 * check job exists
+	 *
+	 * @param jobGroup
+	 * @param executorHandler
+	 * @return
+	 */
+	public ReturnT<XxlJobInfo> existsByGroupAndHandler(int jobGroup, String executorHandler);
 }

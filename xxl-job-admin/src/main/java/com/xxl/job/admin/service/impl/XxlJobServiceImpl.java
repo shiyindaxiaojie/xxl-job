@@ -130,7 +130,7 @@ public class XxlJobServiceImpl implements XxlJobService {
         try {
             XxlJobDynamicScheduler.addJob(qz_name, qz_group, jobInfo.getJobCron());
             //XxlJobDynamicScheduler.pauseJob(qz_name, qz_group);
-            return ReturnT.SUCCESS;
+            return new ReturnT<String>(String.valueOf(jobInfo.getId()));
         } catch (SchedulerException e) {
             logger.error(e.getMessage(), e);
             try {
@@ -376,4 +376,16 @@ public class XxlJobServiceImpl implements XxlJobService {
 		return new ReturnT<Map<String, Object>>(result);
 	}
 
+	/**
+	 * check job exists
+	 *
+	 * @param jobGroup
+	 * @param executorHandler
+	 * @return
+	 */
+	@Override
+	public ReturnT<XxlJobInfo> existsByGroupAndHandler(int jobGroup, String executorHandler) {
+		XxlJobInfo xxlJobInfo = xxlJobInfoDao.findByGroupAndHandler(jobGroup, executorHandler);
+		return new ReturnT<>(xxlJobInfo);
+	}
 }
