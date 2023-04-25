@@ -9,6 +9,10 @@
 	<artifactId>xxl-job-admin</artifactId>
 	<packaging>war</packaging>
 
+	<build>
+		<finalName>${project.artifactId}</finalName>
+	</build>
+
 	<dependencies>
 		<!-- springframe start -->
 		<dependency>
